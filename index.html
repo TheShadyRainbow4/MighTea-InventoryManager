@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -365,10 +364,10 @@
     <div class="toolbar">
         <input type="text" id="searchInput" class="search-box" placeholder="Search inventory items..." onkeyup="filterList()">
         <div class="action-group">
-            <button class="btn-3d btn-yellow" onclick="document.getElementById('importFile').click()" title="Import File">Apply</button>
+            <button class="btn-3d btn-yellow" onclick="document.getElementById('importFile').click()" title="Import JSON File">Import Data</button>
             <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importSession(event)">
-            <button class="btn-3d btn-coral" onclick="exportSession()" title="Export File">Done</button>
-            <button class="btn-3d btn-teal" onclick="exportPDF()" title="Print to PDF">Alright</button>
+            <button class="btn-3d btn-coral" onclick="exportSession()" title="Export JSON File">Export Data</button>
+            <button class="btn-3d btn-teal" onclick="exportPDF()" title="Print to PDF">Save as PDF</button>
         </div>
     </div>
 
@@ -616,7 +615,7 @@
                 <div class="category-content" id="cat-custom_items">
                     <div class="custom-item-adder">
                         <input type="text" id="newCustomItemName" placeholder="Type new item name...">
-                        <button class="btn-3d btn-teal" onclick="addCustomItem()">+ Apply</button>
+                        <button class="btn-3d btn-teal" onclick="addCustomItem()">+ Add Item</button>
                     </div>
                     ${customItemsHtml}
                 </div>
@@ -794,6 +793,3 @@
 </script>
 </body>
 </html>
-
-
-```
