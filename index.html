@@ -32,6 +32,7 @@
             padding: 10px;
             color: var(--text-dark);
             min-height: 100vh;
+            zoom: 0.8; /* Native 80% global zoom out */
         }
 
         /* Glass Container */
@@ -50,7 +51,7 @@
             gap: 15px;
         }
 
-        /* Dynamic Flexbox Logo Header (Replaces broken SVG) */
+        /* Dynamic Flexbox Logo Header */
         .brand-logo-wrapper {
             display: flex;
             flex-direction: column;
@@ -316,7 +317,7 @@
 
         /* Print Styles */
         @media print {
-            body { background: white; padding: 0; }
+            body { background: white; padding: 0; zoom: 1; }
             .app-container { box-shadow: none; border: none; max-width: 100%; }
             .toolbar, .category-header span, .qty-btn, .custom-item-adder, .error-log, .delete-custom-btn { display: none !important; }
             .category-content { display: block !important; }
