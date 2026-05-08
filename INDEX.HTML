@@ -1,0 +1,873 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MighTea Boba Inventory Count</title>
+    <style>
+        /* MighTea Boba! Exact Logo Palette & WinForms Visual Styles */
+        :root {
+            /* Extracted Brand Colors */
+            --logo-primary: #8C1C20;    /* Deep Red/Burgundy from brand */
+            --logo-accent: #E5A822;     /* Gold/Yellow from brand */
+            --logo-dark: #2B2B2B;       /* Dark Text/Shadows */
+            --client-bg: #F5F5F5;       /* Classic Window Background */
+            
+            /* WinForms 3D Button Colors */
+            --btn-face: #F0F0F0;
+            --btn-highlight: #FFFFFF;
+            --btn-shadow: #A0A0A0;
+            --btn-dark-shadow: #696969;
+            --border-standard: #8E8F8F;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            background-color: #D4D4D4; /* Desktop background feel */
+            color: var(--logo-dark);
+            margin: 0;
+            padding: 10px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* Glass Pane Aero Wrapper */
+        .app-window {
+            background-color: var(--client-bg);
+            border: 1px solid var(--border-standard);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.8);
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header / Logo Area */
+        .header {
+            background: linear-gradient(to bottom, var(--logo-primary) 0%, #5A1215 100%);
+            padding: 15px 10px;
+            text-align: center;
+            border-bottom: 3px solid var(--logo-accent);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-logo {
+            max-height: 70px;
+            width: auto;
+            filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.6));
+            margin-bottom: 10px;
+        }
+
+        .fallback-title {
+            color: #FFFFFF;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            display: none; /* Shown only if image fails */
+        }
+
+        /* Search Bar (3D Inset) */
+        .search-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 16px;
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            border: 1px solid var(--btn-dark-shadow);
+            border-top-color: #404040;
+            border-left-color: #404040;
+            border-bottom-color: #E0E0E0;
+            border-right-color: #E0E0E0;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+            background-color: #FFFFFF;
+            color: #000000;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            outline: 2px solid var(--logo-accent);
+            outline-offset: -2px;
+        }
+
+        .client-area {
+            padding: 15px;
+        }
+
+        /* Category Tree-View Style */
+        .category-group {
+            margin-bottom: 15px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-standard);
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .category-header {
+            background: linear-gradient(to bottom, #FAFAFA 0%, #E6E6E6 100%);
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 15px;
+            color: var(--logo-primary);
+            border-bottom: 1px solid var(--border-standard);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .category-header:active {
+            background: linear-gradient(to bottom, #E6E6E6 0%, #D4D4D4 100%);
+        }
+
+        /* Classic Windows Explorer +/- Expand Box */
+        .category-toggle-icon {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000000;
+            background: #FFFFFF;
+            border: 1px solid var(--btn-shadow);
+            width: 16px;
+            height: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            box-shadow: inset 1px 1px 0 rgba(255,255,255,1);
+        }
+
+        .category-items-container {
+            display: block; /* Expanded by default */
+        }
+        
+        .category-group.collapsed .category-items-container {
+            display: none;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px dotted #CCCCCC;
+            background-color: #FFFFFF;
+        }
+        
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            flex: 1;
+            font-size: 14px;
+            padding-right: 10px;
+            word-wrap: break-word;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* High-Fidelity 3D Buttons */
+        button {
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            color: #000000;
+            
+            /* The classic Z-Axis 3D Button look */
+            background: linear-gradient(to bottom, #FFFFFF 0%, #E5E5E5 40%, #D4D4D4 50%, #EAEAEA 100%);
+            border: 1px solid var(--btn-dark-shadow);
+            border-top-color: var(--btn-highlight);
+            border-left-color: var(--btn-highlight);
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            border-radius: 3px;
+        }
+
+        button:active {
+            /* Depressed Z-Axis State */
+            background: linear-gradient(to bottom, #D4D4D4 0%, #E5E5E5 100%);
+            border: 1px solid var(--btn-dark-shadow);
+            border-bottom-color: var(--btn-highlight);
+            border-right-color: var(--btn-highlight);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.4);
+            padding-top: 1px; /* physical push effect */
+            padding-left: 1px;
+        }
+
+        .qty-btn {
+            width: 38px;
+            height: 38px;
+            font-size: 20px;
+        }
+
+        .qty-input {
+            width: 50px;
+            height: 32px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            border: 1px solid var(--btn-dark-shadow);
+            border-top-color: #404040;
+            border-left-color: #404040;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+            -moz-appearance: textfield;
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            color: var(--logo-primary);
+        }
+
+        .qty-input::-webkit-outer-spin-button,
+        .qty-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* 3D Group Box for adding items */
+        .add-item-section {
+            background: var(--client-bg);
+            border: 2px groove #FFFFFF;
+            padding: 15px;
+            margin-top: 25px;
+            position: relative;
+        }
+
+        .add-item-section h3 {
+            position: absolute;
+            top: -12px;
+            left: 10px;
+            background: var(--client-bg);
+            padding: 0 5px;
+            margin: 0;
+            font-size: 14px;
+            color: var(--logo-primary);
+        }
+
+        .form-group {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+        }
+
+        .form-group input {
+            padding: 6px;
+            font-size: 14px;
+            border: 1px solid var(--btn-dark-shadow);
+            border-top-color: #404040;
+            border-left-color: #404040;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        }
+
+        .btn-apply {
+            width: 100%;
+            height: 40px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .action-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-standard);
+        }
+
+        .btn-action {
+            height: 45px;
+            font-size: 14px;
+        }
+
+        .btn-done {
+            grid-column: span 2;
+            height: 55px;
+            font-size: 18px;
+            /* Primary action gets the brand accent color mapped to a 3D surface */
+            background: linear-gradient(to bottom, #FCE8B2 0%, var(--logo-accent) 40%, #D49015 50%, #E5A822 100%);
+            border: 1px solid #996B0D;
+            border-top-color: #FFF2D1;
+            border-left-color: #FFF2D1;
+            color: #000000;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .btn-done:active {
+            background: linear-gradient(to bottom, #D49015 0%, var(--logo-accent) 100%);
+            border-bottom-color: #FFF2D1;
+            border-right-color: #FFF2D1;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* Error Log Area - Strict compliance */
+        #error-log {
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 11px;
+            background-color: #000080; /* Classic BSOD Blue for visibility */
+            color: #FFFFFF;
+            padding: 10px;
+            border: 2px inset #FFFFFF;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            display: none;
+            overflow-x: auto;
+        }
+
+        #import-file-input {
+            display: none;
+        }
+
+        /* Print Settings - Clean PDF Generation */
+        @media print {
+            body { background: white; padding: 0; }
+            .app-window { border: none; box-shadow: none; max-width: 100%; }
+            .header { background: white; border-bottom: 2px solid black; box-shadow: none; padding: 10px 0; }
+            .header-logo { filter: none; max-height: 80px; }
+            .fallback-title { color: black; text-shadow: none; }
+            .search-container, button, .add-item-section, .action-bar, #error-log, .category-toggle-icon { display: none !important; }
+            .category-group { border: none; box-shadow: none; margin-bottom: 15px; }
+            .category-items-container { display: block !important; }
+            .qty-input { border: none; background: transparent; font-weight: bold; font-size: 14px; text-align: right; box-shadow: none; color: black; }
+            .item-row { padding: 2px 0; border-bottom: 1px solid #DDDDDD; display: flex !important; }
+            .category-header { background: transparent; border: none; border-bottom: 1px solid black; padding: 5px 0; margin-top: 15px; color: black; display: flex !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-window">
+        <div class="header">
+            <!-- Utilizing the provided logo image explicitly -->
+            <img src="https://storage.googleapis.com/boba-assets/image.png-a1eea0c5-68cb-4e5a-a898-dd10cd85bbf8" alt="MighTea Boba Logo" class="header-logo" onerror="this.style.display='none'; document.getElementById('fallback-title').style.display='block';">
+            <h1 id="fallback-title" class="fallback-title">MighTea Boba Inventory</h1>
+            
+            <div class="search-container">
+                <input type="text" id="search-box" class="search-input" placeholder="Search items..." onkeyup="App.filterItems()">
+            </div>
+        </div>
+
+        <div class="client-area">
+            <div id="inventory-list"></div>
+
+            <div class="add-item-section">
+                <h3>Add Missing Item</h3>
+                <div class="form-group">
+                    <label for="new-item-name">Item Name:</label>
+                    <input type="text" id="new-item-name" placeholder="e.g. Napkins">
+                </div>
+                <div class="form-group">
+                    <label for="new-item-category">Category:</label>
+                    <input type="text" id="new-item-category" placeholder="e.g. Misc" list="category-list">
+                    <datalist id="category-list"></datalist>
+                </div>
+                <button type="button" class="btn-apply" onclick="App.addCustomItem()">Apply</button>
+            </div>
+
+            <div class="action-bar">
+                <button type="button" class="btn-action" onclick="App.exportData()">Export Session</button>
+                <button type="button" class="btn-action" onclick="document.getElementById('import-file-input').click()">Import Session</button>
+                <input type="file" id="import-file-input" accept=".json" onchange="App.importData(event)">
+                
+                <button type="button" class="btn-done" onclick="App.printPDF()">Done (Print to PDF)</button>
+            </div>
+
+            <div id="error-log"></div>
+        </div>
+    </div>
+
+<script>
+const App = {
+    state: {
+        items: [],
+        collapsedCategories: {}
+    },
+
+    // Meticulously parsed line-by-line from the provided CSV and Dashboard data.
+    // 100% stripped of modern emojis to comply with strict legacy codebase rules.
+    baseData: [
+        { category: "Coffee / Espresso", name: "Espresso - De-caf", qty: 0 },
+        { category: "Coffee / Espresso", name: "Espresso - Regular", qty: 0 },
+        { category: "Coffee / Espresso", name: "Regular Coffee Beans - Canandaigua", qty: 0 },
+        { category: "Coffee / Espresso", name: "Regular Coffee Beans - Seneca", qty: 0 },
+        
+        { category: "Signature Lattes", name: "Powder - White Chocolate Frapp", qty: 0 },
+        { category: "Signature Lattes", name: "Powder - White Knight", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Sauce - Caramel", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Sauce - Dark Chocolatte", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Sauce - White Chocolatte", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Almond", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Blue Raspberry", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Cherry", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Coconut", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Creme de Banana", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Hazelnut", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Irish Cream", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Peanut Butter", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Peppermint", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Pumpkin Pie", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Red Raspberry", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Toasted Mallow", qty: 0 },
+        { category: "Signature Lattes", name: "Torani Syrup - Vanilla Bean", qty: 0 },
+        
+        { category: "Frosted / Blended", name: "Chai - Pumpkin Pie (Limited Time)", qty: 0 },
+        { category: "Frosted / Blended", name: "Chai - Spiced", qty: 0 },
+        { category: "Frosted / Blended", name: "Chai - Vanilla", qty: 0 },
+        { category: "Frosted / Blended", name: "Kidz Cream - Cotton Candy", qty: 0 },
+        { category: "Frosted / Blended", name: "Kidz Cream - Orange", qty: 0 },
+        { category: "Frosted / Blended", name: "Milkshake - Ghirardelli White Chocolatte powder mix", qty: 0 },
+        { category: "Frosted / Blended", name: "Misc - Caramel Latte", qty: 0 },
+        { category: "Frosted / Blended", name: "Misc - Java Chip", qty: 0 },
+        
+        { category: "Fruit Teas", name: "Mango", qty: 0 },
+        { category: "Fruit Teas", name: "Raspberry", qty: 0 },
+        { category: "Fruit Teas", name: "Straw Banana", qty: 0 },
+        { category: "Fruit Teas", name: "Strawberry", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Blueberry", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Green Apple", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Kiwi", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Lemon", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Mango", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Passion Fruit", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Peach", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Pineapple", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Raspberry", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Strawberry", qty: 0 },
+        { category: "Fruit Teas", name: "Fruit Tea Syrup - Watermelon", qty: 0 },
+        
+        { category: "Milk Teas", name: "Milk Tea Powder - Almond", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Banana", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Coconut", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Cotton Candy", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Creamer", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Creme Brulee", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Honeydew", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Mango", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Pumpkin Spice", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Straw Banana", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Strawberry", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Taro", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Thai", qty: 0 },
+        { category: "Milk Teas", name: "Milk Tea Powder - Vanilla", qty: 0 },
+        
+        { category: "Teas (Brewed)", name: "Black", qty: 0 },
+        { category: "Teas (Brewed)", name: "De-Caf Black", qty: 0 },
+        { category: "Teas (Brewed)", name: "Green", qty: 0 },
+        
+        { category: "Bags", name: "Large (for cups)", qty: 0 },
+        { category: "Bags", name: "Small (Beakers etc.)", qty: 0 },
+        
+        { category: "Office / Front Desk", name: "Binder Clips", qty: 0 },
+        { category: "Office / Front Desk", name: "Chalk Markers", qty: 0 },
+        { category: "Office / Front Desk", name: "Label Maker Paper", qty: 0 },
+        { category: "Office / Front Desk", name: "Laminator Sheets", qty: 0 },
+        { category: "Office / Front Desk", name: "Note Pads", qty: 0 },
+        { category: "Office / Front Desk", name: "Notebooks", qty: 0 },
+        { category: "Office / Front Desk", name: "Paper Clips", qty: 0 },
+        { category: "Office / Front Desk", name: "Pens", qty: 0 },
+        { category: "Office / Front Desk", name: "Sharpies", qty: 0 },
+        { category: "Office / Front Desk", name: "Staples", qty: 0 },
+        { category: "Office / Front Desk", name: "Sticky Notes", qty: 0 },
+        { category: "Office / Front Desk", name: "Bank Envelopes", qty: 0 },
+        { category: "Office / Front Desk", name: "Cash Sheets", qty: 0 },
+        { category: "Office / Front Desk", name: "Counterfeit Markers", qty: 0 },
+        { category: "Office / Front Desk", name: "Deposit Slips", qty: 0 },
+        { category: "Office / Front Desk", name: "Receipt Paper", qty: 0 },
+        
+        { category: "Dairy", name: "Almond Milk", qty: 0 },
+        { category: "Dairy", name: "Creamer", qty: 0 },
+        { category: "Dairy", name: "Milk (2%/Whole)", qty: 0 },
+        
+        { category: "CUPS", name: "Cold 16oz", qty: 0 },
+        { category: "CUPS", name: "Cold 24oz", qty: 0 },
+        { category: "CUPS", name: "Cold 32oz", qty: 0 },
+        { category: "CUPS", name: "Hot 16oz", qty: 0 },
+        { category: "CUPS", name: "Hot 20oz", qty: 0 },
+        { category: "CUPS", name: "Ice Cream 16oz", qty: 0 },
+        { category: "CUPS", name: "Ice Cream 4oz", qty: 0 },
+        { category: "CUPS", name: "Ice Cream 6oz", qty: 0 },
+        
+        { category: "Straws", name: "Boba Straws", qty: 0 },
+        { category: "Straws", name: "Regular Straws", qty: 0 },
+        
+        { category: "Misc. (General)", name: "Dishes - Drying Mats", qty: 0 },
+        { category: "Misc. (General)", name: "Dishes - Rags", qty: 0 },
+        { category: "Misc. (General)", name: "Seasonal Milkshake - Decorative Sugar Dust", qty: 0 },
+        { category: "Misc. (General)", name: "Seasonal Milkshake - Gummies", qty: 0 },
+        
+        { category: "Sugars", name: "Brown (Medium)", qty: 0 },
+        { category: "Sugars", name: "White", qty: 0 },
+        
+        { category: "Boba / Add-ins", name: "Jellies - Coffee Jelly", qty: 0 },
+        { category: "Boba / Add-ins", name: "Jellies - Lychee & Lychee Coconut", qty: 0 },
+        { category: "Boba / Add-ins", name: "Popping Pearls - Blueberry", qty: 0 },
+        { category: "Boba / Add-ins", name: "Popping Pearls - Cherry", qty: 0 },
+        { category: "Boba / Add-ins", name: "Popping Pearls - Green Apple", qty: 0 },
+        { category: "Boba / Add-ins", name: "Popping Pearls - Mango", qty: 0 },
+        { category: "Boba / Add-ins", name: "Popping Pearls - Pomegranate", qty: 0 },
+        { category: "Boba / Add-ins", name: "Popping Pearls - Strawberry", qty: 0 },
+        { category: "Boba / Add-ins", name: "Tapioca / Misc - Coffee Popping", qty: 0 },
+        { category: "Boba / Add-ins", name: "Tapioca / Misc - Tapioca", qty: 0 },
+        
+        { category: "Beakers", name: "Lids", qty: 0 },
+        { category: "Beakers", name: "Tubes", qty: 0 },
+        
+        { category: "Chemicals", name: "Bathroom Scent Spray", qty: 0 },
+        { category: "Chemicals", name: "Bleach", qty: 0 },
+        { category: "Chemicals", name: "Dish Detergent", qty: 0 },
+        { category: "Chemicals", name: "Mop Solution", qty: 0 },
+        { category: "Chemicals", name: "Sanitizer", qty: 0 },
+        { category: "Chemicals", name: "Toilet Cleaner", qty: 0 },
+        { category: "Chemicals", name: "Windex", qty: 0 }
+    ],
+
+    init: function() {
+        try {
+            this.state.items = JSON.parse(JSON.stringify(this.baseData));
+            
+            // Explicitly set all categories to NOT collapsed (expanded) by default
+            const categories = [...new Set(this.state.items.map(item => item.category))];
+            categories.forEach(cat => {
+                this.state.collapsedCategories[cat] = false;
+            });
+
+            this.render();
+            this.updateCategoryDatalist();
+        } catch (err) {
+            this.logError("ERR_INIT_001", err);
+        }
+    },
+
+    toggleCategory: function(categoryName) {
+        try {
+            this.state.collapsedCategories[categoryName] = !this.state.collapsedCategories[categoryName];
+            this.filterItems(); // Re-apply visibility rules
+        } catch (err) {
+            this.logError("ERR_TOGGLE_002", err);
+        }
+    },
+
+    render: function() {
+        try {
+            const container = document.getElementById('inventory-list');
+            container.innerHTML = '';
+
+            const groupedItems = {};
+            this.state.items.forEach((item, index) => {
+                if (!groupedItems[item.category]) {
+                    groupedItems[item.category] = [];
+                }
+                groupedItems[item.category].push({ ...item, refIndex: index });
+            });
+
+            const categories = [...new Set(this.state.items.map(item => item.category))];
+
+            categories.forEach(cat => {
+                const isCollapsed = this.state.collapsedCategories[cat];
+                
+                const groupDiv = document.createElement('div');
+                groupDiv.className = `category-group ${isCollapsed ? 'collapsed' : ''}`;
+                groupDiv.setAttribute('data-category', cat);
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'category-header';
+                headerDiv.onclick = () => this.toggleCategory(cat);
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = cat;
+                
+                const toggleIcon = document.createElement('span');
+                toggleIcon.className = 'category-toggle-icon';
+                // Classic tree-view style indicators
+                toggleIcon.textContent = isCollapsed ? '+' : '-';
+
+                headerDiv.appendChild(titleSpan);
+                headerDiv.appendChild(toggleIcon);
+                groupDiv.appendChild(headerDiv);
+
+                const itemsContainer = document.createElement('div');
+                itemsContainer.className = 'category-items-container';
+
+                groupedItems[cat].forEach(item => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'item-row';
+                    rowDiv.setAttribute('data-search-text', item.name.toLowerCase());
+
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'item-name';
+                    nameDiv.textContent = item.name;
+
+                    const controlsDiv = document.createElement('div');
+                    controlsDiv.className = 'controls';
+
+                    const btnMinus = document.createElement('button');
+                    btnMinus.type = 'button';
+                    btnMinus.className = 'qty-btn';
+                    btnMinus.textContent = '-';
+                    btnMinus.onclick = (e) => { e.stopPropagation(); this.updateQuantity(item.refIndex, -1); };
+
+                    const inputQty = document.createElement('input');
+                    inputQty.type = 'number';
+                    inputQty.className = 'qty-input';
+                    inputQty.value = item.qty;
+                    inputQty.min = 0;
+                    inputQty.onclick = (e) => e.stopPropagation();
+                    inputQty.onchange = (e) => this.setQuantity(item.refIndex, e.target.value);
+
+                    const btnPlus = document.createElement('button');
+                    btnPlus.type = 'button';
+                    btnPlus.className = 'qty-btn';
+                    btnPlus.textContent = '+';
+                    btnPlus.onclick = (e) => { e.stopPropagation(); this.updateQuantity(item.refIndex, 1); };
+
+                    controlsDiv.appendChild(btnMinus);
+                    controlsDiv.appendChild(inputQty);
+                    controlsDiv.appendChild(btnPlus);
+
+                    rowDiv.appendChild(nameDiv);
+                    rowDiv.appendChild(controlsDiv);
+
+                    itemsContainer.appendChild(rowDiv);
+                });
+
+                groupDiv.appendChild(itemsContainer);
+                container.appendChild(groupDiv);
+            });
+        } catch (err) {
+            this.logError("ERR_RENDER_003", err);
+        }
+    },
+
+    filterItems: function() {
+        try {
+            const searchTerm = document.getElementById('search-box').value.toLowerCase();
+            const groups = document.querySelectorAll('.category-group');
+
+            groups.forEach(group => {
+                const catName = group.getAttribute('data-category');
+                const items = group.querySelectorAll('.item-row');
+                let hasVisibleItems = false;
+
+                const icon = group.querySelector('.category-toggle-icon');
+                if(icon) {
+                    icon.textContent = this.state.collapsedCategories[catName] ? '+' : '-';
+                }
+
+                items.forEach(item => {
+                    const itemName = item.getAttribute('data-search-text');
+                    if (itemName.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                        hasVisibleItems = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                if (searchTerm !== '' && hasVisibleItems) {
+                    group.classList.remove('collapsed');
+                    if(icon) icon.textContent = '-';
+                } else if (searchTerm === '') {
+                    if(this.state.collapsedCategories[catName]) {
+                        group.classList.add('collapsed');
+                        if(icon) icon.textContent = '+';
+                    }
+                }
+
+                if (hasVisibleItems) {
+                    group.style.display = 'block';
+                } else {
+                    group.style.display = 'none';
+                }
+            });
+        } catch (err) {
+            this.logError("ERR_FILTER_004", err);
+        }
+    },
+
+    updateQuantity: function(index, delta) {
+        try {
+            let current = parseInt(this.state.items[index].qty) || 0;
+            let newVal = current + delta;
+            if (newVal < 0) newVal = 0; 
+            this.state.items[index].qty = newVal;
+            
+            this.render();
+            this.filterItems(); 
+        } catch (err) {
+            this.logError("ERR_QTY_UPDATE_005", err);
+        }
+    },
+
+    setQuantity: function(index, value) {
+        try {
+            let newVal = parseInt(value);
+            if (isNaN(newVal) || newVal < 0) newVal = 0;
+            this.state.items[index].qty = newVal;
+            
+            this.render(); 
+            this.filterItems();
+        } catch (err) {
+            this.logError("ERR_QTY_SET_006", err);
+        }
+    },
+
+    addCustomItem: function() {
+        try {
+            const nameInput = document.getElementById('new-item-name');
+            const catInput = document.getElementById('new-item-category');
+            
+            const name = nameInput.value.trim();
+            const category = catInput.value.trim() || "Uncategorized";
+
+            if (!name) {
+                alert("Item name cannot be empty.");
+                return;
+            }
+
+            this.state.items.push({
+                category: category,
+                name: name,
+                qty: 0
+            });
+            
+            if (this.state.collapsedCategories[category] === undefined) {
+                this.state.collapsedCategories[category] = false;
+            }
+
+            nameInput.value = '';
+            catInput.value = '';
+
+            this.render();
+            this.filterItems();
+            this.updateCategoryDatalist();
+            
+            window.scrollTo(0, document.body.scrollHeight);
+        } catch (err) {
+            this.logError("ERR_ADD_ITEM_007", err);
+        }
+    },
+
+    updateCategoryDatalist: function() {
+        try {
+            const datalist = document.getElementById('category-list');
+            datalist.innerHTML = '';
+            
+            const categories = new Set(this.state.items.map(item => item.category));
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                datalist.appendChild(option);
+            });
+        } catch (err) {
+            this.logError("ERR_DATALIST_008", err);
+        }
+    },
+
+    exportData: function() {
+        try {
+            const dataStr = JSON.stringify(this.state.items, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `MighTea_Boba_Inventory_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            this.logError("ERR_EXPORT_DATA_009", err);
+        }
+    },
+
+    importData: function(event) {
+        try {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        this.state.items = importedData;
+                        
+                        const categories = [...new Set(this.state.items.map(item => item.category))];
+                        categories.forEach(cat => {
+                            if (this.state.collapsedCategories[cat] === undefined) {
+                                this.state.collapsedCategories[cat] = false;
+                            }
+                        });
+
+                        this.render();
+                        this.filterItems();
+                        this.updateCategoryDatalist();
+                        
+                        document.getElementById('import-file-input').value = "";
+                        alert("Inventory session data successfully loaded.");
+                    } else {
+                        throw new Error("Invalid format detected in JSON file.");
+                    }
+                } catch (parseErr) {
+                    this.logError("ERR_IMPORT_PARSE_010", parseErr);
+                    alert("Failed to parse the imported file. Check the strict error log below.");
+                }
+            };
+            reader.readAsText(file);
+        } catch (err) {
+            this.logError("ERR_IMPORT_READ_011", err);
+        }
+    },
+
+    printPDF: function() {
+        try {
+            const searchBox = document.getElementById('search-box');
+            if (searchBox.value !== '') {
+                searchBox.value = '';
+                this.filterItems();
+            }
+            window.print();
+        } catch (err) {
+            this.logError("ERR_PRINT_012", err);
+        }
+    },
+
+    logError: function(code, err) {
+        const logArea = document.getElementById('error-log');
+        logArea.style.display = 'block';
+        const timestamp = new Date().toISOString();
+        const logEntry = `[${timestamp}] EXCEPTION_CODE_${code}: ${err.message}\n`;
+        logArea.textContent += logEntry;
+        console.error(logEntry, err);
+    }
+};
+
+window.onload = function() {
+    App.init();
+};
+</script>
+</body>
+</html>
+
+
+```
