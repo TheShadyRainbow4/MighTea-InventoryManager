@@ -253,7 +253,7 @@
             display: none;
         }
 
-        /* Item Row */
+        /* Item Row & Par Level Indicators */
         .item-row {
             display: flex;
             justify-content: space-between;
@@ -272,6 +272,21 @@
             flex-grow: 1;
             font-size: 15px;
             padding-right: 10px;
+        }
+
+        .par-warning {
+            display: none;
+            font-size: 13px;
+            color: var(--brand-coral);
+            margin-left: 6px;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        /* Visually flag the row as low stock on screen */
+        .below-par .item-name .name-text {
+            color: var(--brand-coral);
+            font-weight: bold;
         }
 
         /* Controls */
@@ -347,7 +362,7 @@
             display: none;
         }
 
-        /* Print Styles - Overhauled for Native Page Breaks */
+        /* Print Styles - Overhauled for Native Page Breaks & Red Warnings */
         @media print {
             body { 
                 background: white; 
@@ -403,6 +418,19 @@
                 border-bottom: 1px solid #ccc; 
                 page-break-inside: avoid; 
                 break-inside: avoid;
+            }
+
+            /* Unhide and force red ink for items at/below par during print */
+            .below-par .item-name .name-text {
+                color: #d32f2f !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .below-par .par-warning {
+                display: inline-block !important;
+                color: #d32f2f !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
@@ -479,6 +507,72 @@
     window.appState = {
         counts: {},
         customItems: [] 
+    };
+
+    // --- Real-World Par Level Definitions ---
+    // Extracted directly from MighTea Boba documents. Anything missing defaults to 1.
+    const parLevels = {
+        "Fruit Tea Syrup - Strawberry": 3,
+        "Fruit Tea Syrup - Raspberry": 3,
+        "Fruit Tea Syrup - Lemon": 2,
+        "Fruit Tea Syrup - Mango": 2,
+        "Fruit Tea Syrup - Passion Fruit": 2,
+        "Fruit Tea Syrup - Pineapple": 2,
+        "Fruit Tea Syrup - Peach": 1,
+        "Fruit Tea Syrup - Blueberry": 0,
+        "Fruit Tea Syrup - Watermelon": 0,
+        "Fruit Tea Syrup - Kiwi": 0,
+        "Fruit Tea Syrup - Green Apple": 0,
+        "Milk Tea Powder - Almond": 1,
+        "Milk Tea Powder - Black Milk": 1,
+        "Milk Tea Powder - Coconut": 1,
+        "Milk Tea Powder - Thai": 1,
+        "Milk Tea Powder - Chocolate": 1,
+        "Milk Tea Powder - Taro": 1,
+        "Milk Tea Powder - Blue Hawaiian": 2,
+        "Milk Tea Powder - Strawberry": 1,
+        "Milk Tea Powder - Honeydew": 1,
+        "Milk Tea Powder - Banana": 1,
+        "Milk Tea Powder - Brown Sugar": 1,
+        "Milk Tea Powder - Coffee": 0,
+        "Milk Tea Powder - Vanilla": 1,
+        "Milk Tea Powder - Creme Brulee": 0,
+        "Milk Tea Powder - Creamer": 4,
+        "Chai - Spiced": 1,
+        "Chai - Vanilla": 1,
+        "Torani Syrup - Vanilla Bean": 1,
+        "Torani Syrup - Peanut Butter": 1,
+        "Torani Syrup - Red Raspberry": 0,
+        "Torani Syrup - Irish Cream": 0,
+        "Torani Syrup - Coconut": 0,
+        "Torani Syrup - Toasted Mallow": 0,
+        "Torani Syrup - Creme de Banana": 0,
+        "Torani Syrup - Hazelnut": 1,
+        "Torani Syrup - Peppermint": 0,
+        "Torani Syrup - Pumpkin Pie": 0,
+        "Popping Pearls - Strawberry": 2,
+        "Popping Pearls - Blueberry": 2,
+        "Popping Pearls - Mango": 2,
+        "Popping Pearls - Green Apple": 0,
+        "Popping Pearls - Cherry": 0,
+        "Tapioca / Misc - Coffee Popping": 0,
+        "Jellies - Lychee & Lychee Coconut": 0,
+        "Tapioca / Misc - Tapioca": 2,
+        "Strawberry": 2, // Smoothies
+        "Straw Banana": 2,
+        "Mango": 2,
+        "Raspberry": 0,
+        "Green": 2, // Teas
+        "Black": 1,
+        "De-Caf Black": 0.5,
+        "Skim": 1, // Dairy
+        "Milk (2%/Whole)": 1,
+        "Almond Milk": 0.5,
+        "Creamer": 0.5
+    };
+
+    window.getParLevel = function(itemName) {
+        return parLevels[itemName] !== undefined ? parLevels[itemName] : 1;
     };
 
     // --- Data Dictionary ---
@@ -573,7 +667,6 @@
         if (typeof window.saveToCloud === 'function') {
             window.saveToCloud();
         } else {
-            // Legacy Local Cookie Fallback for Github Pages
             try {
                 const dataStr = encodeURIComponent(JSON.stringify(window.appState));
                 if (dataStr.length > 4000) {
@@ -607,7 +700,6 @@
             loadStateLocally();
             renderInventory();
             
-            // Cloud boot trigger
             if (typeof window.initCloudStorage === 'function') {
                 window.initCloudStorage();
             }
@@ -628,22 +720,49 @@
         }
     }
 
+    // Mathematical update allowing floats
     function updateCount(itemId, val) {
-        let current = parseInt(window.appState.counts[itemId] || 0);
+        let current = parseFloat(window.appState.counts[itemId] || 0);
         current += val;
         if(current < 0) current = 0;
+        
+        // Clean up floating point math quirks (e.g. 0.5 - 0.1 = 0.3999999999)
+        current = Number(current.toFixed(2));
+        
         window.appState.counts[itemId] = current;
         document.getElementById(`input-${itemId}`).value = current;
+        
+        window.checkPar(itemId);
         window.saveState();
     }
 
+    // Manual input allowing floats
     function manualCountUpdate(itemId, inputElement) {
-        let val = parseInt(inputElement.value);
+        let val = parseFloat(inputElement.value);
         if(isNaN(val) || val < 0) val = 0;
+        val = Number(val.toFixed(2));
+        
         window.appState.counts[itemId] = val;
         inputElement.value = val;
+        
+        window.checkPar(itemId);
         window.saveState();
     }
+
+    // Par checking engine to update CSS visually
+    window.checkPar = function(itemId) {
+        const row = document.getElementById(`row-${itemId}`);
+        if(!row) return;
+        
+        const par = parseFloat(row.getAttribute('data-par'));
+        const count = parseFloat(window.appState.counts[itemId] || 0);
+        
+        if(count <= par) {
+            row.classList.add('below-par');
+        } else {
+            row.classList.remove('below-par');
+        }
+    };
 
     function addCustomItem() {
         try {
@@ -723,15 +842,22 @@
     }
 
     function createItemRow(id, name, isCustom = false) {
-        const count = window.appState.counts[id] || 0;
+        const count = parseFloat(window.appState.counts[id] || 0);
+        // Custom items default to a par level of 0 to avoid immediate red warnings
+        const par = isCustom ? 0 : window.getParLevel(name); 
+        const isBelow = count <= par ? 'below-par' : '';
+        
         let deleteBtn = isCustom ? `<button class="delete-custom-btn" onclick="removeCustomItem('${id}')" title="Remove custom item">x</button>` : '';
         
         return `
-            <div class="item-row" data-name="${name.toLowerCase()}">
-                <div class="item-name">${deleteBtn} ${name}</div>
+            <div class="item-row ${isBelow}" id="row-${id}" data-name="${name.toLowerCase()}" data-par="${par}">
+                <div class="item-name">
+                    ${deleteBtn} <span class="name-text">${name}</span>
+                    <span class="par-warning">[At or below par]</span>
+                </div>
                 <div class="quantity-controls">
                     <button class="btn-3d btn-gray qty-btn" onclick="updateCount('${id}', -1)">-</button>
-                    <input type="number" class="qty-input" id="input-${id}" value="${count}" onchange="manualCountUpdate('${id}', this)">
+                    <input type="number" step="any" class="qty-input" id="input-${id}" value="${count}" onchange="manualCountUpdate('${id}', this)">
                     <button class="btn-3d btn-gray qty-btn" onclick="updateCount('${id}', 1)">+</button>
                 </div>
             </div>
