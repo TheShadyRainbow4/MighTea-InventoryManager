@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MighTea Boba Inventory Tracker</title>
+    
+    <!-- 3D Legacy Style Brand Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='gl' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='white' stop-opacity='0.6'/%3E%3Cstop offset='100%25' stop-color='black' stop-opacity='0.4'/%3E%3C/linearGradient%3E%3Cfilter id='ds' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeDropShadow dx='1' dy='2' stdDeviation='2' flood-opacity='0.3'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23ds)'%3E%3Ccircle cx='20' cy='36' r='16' fill='%2352BFC1'/%3E%3Ccircle cx='44' cy='36' r='16' fill='%23F16954'/%3E%3Ccircle cx='20' cy='36' r='16' fill='url(%23gl)'/%3E%3Ccircle cx='44' cy='36' r='16' fill='url(%23gl)'/%3E%3Cpath d='M38 4 L14 36 L30 36 L22 60 L50 24 L34 24 Z' fill='%23F3C332'/%3E%3Cpath d='M38 4 L14 36 L30 36 L22 60 L50 24 L34 24 Z' fill='url(%23gl)'/%3E%3C/g%3E%3C/svg%3E">
+
     <style>
-        /* Classic Windows Aero / WinForms Style Variables + Brand Colors */
         :root {
+            /* ========================================================== */
+            /* GLOBAL APP SCALE FACTOR (EDIT THIS TO RESIZE EVERYTHING)   */
+            /* ========================================================== */
+            --app-scale-factor: 0.8;
+            
+            /* Classic Windows Aero / WinForms Style Variables + Brand Colors */
             --brand-coral: #F16954;
             --brand-teal: #52BFC1;
             --brand-yellow: #F3C332;
@@ -32,7 +41,7 @@
             padding: 10px;
             color: var(--text-dark);
             min-height: 100vh;
-            zoom: 0.8; /* Native 80% global zoom out */
+            zoom: var(--app-scale-factor);
         }
 
         /* Glass Container */
@@ -330,7 +339,6 @@
 <body>
 
 <div class="app-container">
-    <!-- CSS Flexbox Logo Implementation - Guaranteed not to overlap -->
     <div class="brand-logo-wrapper">
         <div class="brand-text-row">
             <span class="brand-text-coral">MighTea</span>
@@ -376,13 +384,13 @@
 </div>
 
 <script>
-    // --- State Management ---
-    let appState = {
+    // --- Global State Management ---
+    window.appState = {
         counts: {},
         customItems: [] 
     };
 
-    // --- Data Dictionary (Exhaustive and sanitized for strict code rules) ---
+    // --- Data Dictionary ---
     const inventoryData = {
         "Coffee / Espresso": [
             "Espresso - De-caf", "Espresso - Regular", "Regular Coffee Beans - Canandaigua", "Regular Coffee Beans - Seneca"
@@ -462,19 +470,58 @@
     };
 
     // --- Utilities & Logging ---
-    function logError(code, err) {
+    window.logError = function(code, err) {
         const logBox = document.getElementById('errorLog');
         const time = new Date().toISOString();
         logBox.innerHTML += `[${time}] ERR_${code}: ${err.message || err}<br>`;
         console.error(err);
     }
 
+    // --- Dual-Layer Persistence Engine ---
+    window.saveState = function() {
+        if (typeof window.saveToCloud === 'function') {
+            window.saveToCloud();
+        } else {
+            // Legacy Local Cookie Fallback for Github Pages
+            try {
+                const dataStr = encodeURIComponent(JSON.stringify(window.appState));
+                if (dataStr.length > 4000) {
+                    window.logError('0x00E_COOKIE_OVERFLOW', 'State too large for legacy cookie. Please export session file.');
+                    return;
+                }
+                const expires = new Date(Date.now() + 365*24*60*60*1000).toUTCString();
+                document.cookie = `mighTeaState=${dataStr}; expires=${expires}; path=/; SameSite=Lax`;
+            } catch(e) {
+                window.logError('0x00F_COOKIE_SAVE', e);
+            }
+        }
+    };
+
+    function loadStateLocally() {
+        try {
+            const match = document.cookie.match(new RegExp('(^| )mighTeaState=([^;]+)'));
+            if (match) {
+                const loadedData = JSON.parse(decodeURIComponent(match[2]));
+                if(loadedData.counts) window.appState.counts = loadedData.counts;
+                if(loadedData.customItems) window.appState.customItems = loadedData.customItems;
+            }
+        } catch(e) {
+            window.logError('0x010_COOKIE_LOAD', e);
+        }
+    }
+
     // --- Core Logic ---
     function init() {
         try {
+            loadStateLocally();
             renderInventory();
+            
+            // Cloud boot trigger
+            if (typeof window.initCloudStorage === 'function') {
+                window.initCloudStorage();
+            }
         } catch(e) {
-            logError('0x001_INIT', e);
+            window.logError('0x001_INIT', e);
         }
     }
 
@@ -491,21 +538,22 @@
     }
 
     function updateCount(itemId, val) {
-        let current = parseInt(appState.counts[itemId] || 0);
+        let current = parseInt(window.appState.counts[itemId] || 0);
         current += val;
         if(current < 0) current = 0;
-        appState.counts[itemId] = current;
+        window.appState.counts[itemId] = current;
         document.getElementById(`input-${itemId}`).value = current;
+        window.saveState();
     }
 
     function manualCountUpdate(itemId, inputElement) {
         let val = parseInt(inputElement.value);
         if(isNaN(val) || val < 0) val = 0;
-        appState.counts[itemId] = val;
+        window.appState.counts[itemId] = val;
         inputElement.value = val;
+        window.saveState();
     }
 
-    // Custom Items Logic
     function addCustomItem() {
         try {
             const input = document.getElementById('newCustomItemName');
@@ -513,46 +561,32 @@
             if(!name) return;
 
             const id = 'custom_' + Date.now();
-            appState.customItems.push({ id: id, name: name });
-            appState.counts[id] = 0;
+            window.appState.customItems.push({ id: id, name: name });
+            window.appState.counts[id] = 0;
             input.value = '';
             
             renderInventory();
+            window.saveState();
             
             const customContent = document.getElementById(`cat-custom_items`);
             if(customContent && customContent.classList.contains('collapsed')) {
                 toggleCategory('custom_items');
             }
         } catch(e) {
-            logError('0x002_ADD_CUSTOM', e);
+            window.logError('0x002_ADD_CUSTOM', e);
         }
     }
 
     function removeCustomItem(id) {
         if(!confirm('Remove this custom item?')) return;
-        appState.customItems = appState.customItems.filter(item => item.id !== id);
-        delete appState.counts[id];
+        window.appState.customItems = window.appState.customItems.filter(item => item.id !== id);
+        delete window.appState.counts[id];
         renderInventory();
+        window.saveState();
     }
 
     // Render Engine
-    function createItemRow(id, name, isCustom = false) {
-        const count = appState.counts[id] || 0;
-        let deleteBtn = isCustom ? `<button class="delete-custom-btn" onclick="removeCustomItem('${id}')" title="Remove custom item">x</button>` : '';
-        
-        return `
-            <div class="item-row" data-name="${name.toLowerCase()}">
-                <div class="item-name">${deleteBtn} ${name}</div>
-                <div class="quantity-controls">
-                    <button class="btn-3d btn-gray qty-btn" onclick="updateCount('${id}', -1)">-</button>
-                    <input type="number" class="qty-input" id="input-${id}" value="${count}" onchange="manualCountUpdate('${id}', this)">
-                    <button class="btn-3d btn-gray qty-btn" onclick="updateCount('${id}', 1)">+</button>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderInventory() {
+    window.renderInventory = function() {
         const wrapper = document.getElementById('inventoryWrapper');
         let html = '';
         let catIndex = 0;
@@ -576,7 +610,7 @@
             catIndex++;
         }
 
-        let customItemsHtml = appState.customItems.map(item => createItemRow(item.id, item.name, true)).join('');
+        let customItemsHtml = window.appState.customItems.map(item => createItemRow(item.id, item.name, true)).join('');
         
         html += `
             <div class="category" id="group-custom_items">
@@ -597,7 +631,22 @@
         filterList();
     }
 
-    // --- Search Filtering ---
+    function createItemRow(id, name, isCustom = false) {
+        const count = window.appState.counts[id] || 0;
+        let deleteBtn = isCustom ? `<button class="delete-custom-btn" onclick="removeCustomItem('${id}')" title="Remove custom item">x</button>` : '';
+        
+        return `
+            <div class="item-row" data-name="${name.toLowerCase()}">
+                <div class="item-name">${deleteBtn} ${name}</div>
+                <div class="quantity-controls">
+                    <button class="btn-3d btn-gray qty-btn" onclick="updateCount('${id}', -1)">-</button>
+                    <input type="number" class="qty-input" id="input-${id}" value="${count}" onchange="manualCountUpdate('${id}', this)">
+                    <button class="btn-3d btn-gray qty-btn" onclick="updateCount('${id}', 1)">+</button>
+                </div>
+            </div>
+        `;
+    }
+
     function filterList() {
         try {
             const query = document.getElementById('searchInput').value.toLowerCase();
@@ -624,14 +673,13 @@
                 }
             });
         } catch(e) {
-            logError('0x003_SEARCH', e);
+            window.logError('0x003_SEARCH', e);
         }
     }
 
-    // --- Import / Export ---
     function exportSession() {
         try {
-            const dataStr = JSON.stringify(appState, null, 2);
+            const dataStr = JSON.stringify(window.appState, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             
@@ -645,7 +693,7 @@
             
             alert('Session Exported Successfully.');
         } catch(e) {
-            logError('0x004_EXPORT', e);
+            window.logError('0x004_EXPORT', e);
         }
     }
 
@@ -658,19 +706,20 @@
             reader.onload = function(e) {
                 try {
                     const loadedData = JSON.parse(e.target.result);
-                    if(loadedData.counts) appState.counts = loadedData.counts;
-                    if(loadedData.customItems) appState.customItems = loadedData.customItems;
+                    if(loadedData.counts) window.appState.counts = loadedData.counts;
+                    if(loadedData.customItems) window.appState.customItems = loadedData.customItems;
                     
-                    renderInventory();
+                    window.renderInventory();
+                    window.saveState();
                     alert('Session Imported Successfully.');
                 } catch(err) {
-                    logError('0x005_PARSE', err);
+                    window.logError('0x005_PARSE', err);
                     alert("Failed to parse JSON file.");
                 }
             };
             reader.readAsText(file);
         } catch(e) {
-            logError('0x006_IMPORT', e);
+            window.logError('0x006_IMPORT', e);
         }
         event.target.value = ''; 
     }
@@ -679,12 +728,73 @@
         try {
             window.print();
         } catch(e) {
-            logError('0x007_PRINT', e);
+            window.logError('0x007_PRINT', e);
         }
     }
 
     // Start App
     window.onload = init;
+</script>
+
+<!-- Immersive Canvas Cloud Sync Support (Auto-Bypassed when deployed to GitHub) -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    window.initCloudStorage = async function() {
+        if (typeof __firebase_config === 'undefined') return false;
+        
+        try {
+            const firebaseConfig = JSON.parse(__firebase_config);
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            let userId = null;
+
+            const initAuth = async () => {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            };
+            
+            await initAuth();
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    const docRef = doc(db, 'artifacts', appId, 'users', userId, 'inventoryData', 'currentState');
+                    
+                    onSnapshot(docRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            if(data.counts) window.appState.counts = data.counts;
+                            if(data.customItems) window.appState.customItems = data.customItems;
+                            window.renderInventory();
+                        }
+                    }, (err) => {
+                        window.logError('0x008_CLOUD_SYNC', err);
+                    });
+                    
+                    window.saveToCloud = async function() {
+                        if (!userId) return;
+                        try {
+                            await setDoc(docRef, window.appState);
+                        } catch(e) {
+                            window.logError('0x009_CLOUD_SAVE', e);
+                        }
+                    };
+                }
+            });
+            return true;
+        } catch(e) {
+            window.logError('0x00A_CLOUD_INIT', e);
+            return false;
+        }
+    };
 </script>
 </body>
 </html>
