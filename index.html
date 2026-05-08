@@ -12,6 +12,31 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnbCIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IndoaXRlIiBzdG9wLW9wYWNpdHk9IjAuNiIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iYmxhY2siIHN0b3Atb3BhY2l0eT0iMC40Ii8+PC9saW5lYXJHcmFkaWVudD48ZmlsdGVyIGlkPSJkcyIgeD0iLTIwJSIgeT0iLTIwJSIgd2lkdGg9IjE0MCUiIGhlaWdodD0iMTQwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMSIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMiIgZmxvb2Qtb3BhY2l0eT0iMC4zIi8+PC9maWx0ZXI+PC9kZWZzPjxnIGZpbHRlcj0idXJsKCNkcykiPjxjaXJjbGUgY3g9IjE2IiBjeT0iNDAiIHI9IjE0IiBmaWxsPSIjNTJCRkMxIi8+PGNpcmNsZSBjeD0iMzIiIGN5PSI0MCIgcj0iMTQiIGZpbGw9IiNGM0MzMzIiLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjQwIiByPSIxNCIgZmlsbD0iI0YxNjk1NCIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iNDAiIHI9IjE0IiBmaWxsPSJ1cmwoI2dsKSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNDAiIHI9IjE0IiBmaWxsPSJ1cmwoI2dsKSIvPjxjaXJjbGUgY3g9IjQ4IiBjeT0iNDAiIHI9IjE0IiBmaWxsPSJ1cmwoI2dsKSIvPjxwYXRoIGQ9Ik00MiA0IEwxOCAzNiBMMzQgMzYgTDI2IDYwIEw1NCAyNCBMMzggMjQgWiIgZmlsbD0iI0YzQzMzMiIvPjxwYXRoIGQ9Ik00MiA0IEwxOCAzNiBMMzQgMzYgTDI2IDYwIEw1NCAyNCBMMzggMjQgWiIgZmlsbD0idXJsKCNnbCkiLz48L2c+PC9zdmc+">
 
     <style>
+        /* Import Inter from Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            /* These act as placeholders until the JS randomizes them a millisecond later */
+            --font-headings: 'Futura', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-ui: 'Helvetica Neue', sans-serif;
+        }
+
+        /* 1. Headings */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-headings) !important;
+        }
+
+        /* 2. Standard Body & Table Data */
+        body, p, table, th, td, span, div {
+            font-family: var(--font-body) !important;
+        }
+
+        /* 3. Interactive UI Elements */
+        button, input, select, textarea {
+            font-family: var(--font-ui) !important;
+        }
+
         :root {
             /* Classic Windows Aero / WinForms Style Variables + Brand Colors */
             --brand-coral: #F16954;
@@ -426,6 +451,30 @@
 </div>
 
 <script>
+    // --- FONT ROULETTE RANDOMIZER ---
+    (function randomizeFonts() {
+        // Our three required fonts
+        const fonts = [
+            '"Futura", sans-serif', 
+            '"Inter", sans-serif', 
+            '"Helvetica Neue", sans-serif'
+        ];
+
+        // Fisher-Yates Shuffle to ensure true randomness and absolutely zero repeats
+        for (let i = fonts.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [fonts[i], fonts[j]] = [fonts[j], fonts[i]];
+        }
+
+        // Assign the shuffled fonts to the CSS variables
+        document.documentElement.style.setProperty('--font-headings', fonts[0]);
+        document.documentElement.style.setProperty('--font-body', fonts[1]);
+        document.documentElement.style.setProperty('--font-ui', fonts[2]);
+        
+        console.log("🎲 Font Roulette Spun! Headings:", fonts[0], "| Body:", fonts[1], "| UI:", fonts[2]);
+    })();
+    // --------------------------------
+
     // --- Global State Management ---
     window.appState = {
         counts: {},
