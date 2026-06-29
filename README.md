@@ -1,24 +1,24 @@
 ﻿# MighTea-InventoryManager
 
 ## What It Is
-MighTea-InventoryManager is a dedicated desktop utility developed by EliteSoftwareTech Co. to handle system automation and management tasks.
+## What It Is
 
 ## Scope
 Outlines the core functions, limitations, and operational boundaries of the MighTea-InventoryManager utility.
 
 ## Plans
-Roadmap includes UI refinements, bug fixes, and expanded compatibility options.
+- UI refinements to align with classic WinForms high-density layout guidelines.
+- Dynamic registry-driven settings manager expansion.
+- Detailed operations logging enhancements.
 
 ## Development
 Built in accordance with EliteSoftware GUI development guidelines.
-- **Framework**: .NET Framework 4.6 / WinForms
-- **Visual Styles**: Enabled
-- **Apartment State**: STA Mode enforced for GUI reliability.
+- **Technology Stack**: Web technologies (HTML, Vanilla CSS, JavaScript).
+- **Environment**: Modern web browser or Electron runtime container.
 
 ## How to Use
-1. Launch the executable or run the script.
-2. Follow the on-screen instructions or refer to tooltips for interactive elements.
-3. Access Settings from the main menu for configuration.
+1. Open the project in a web browser, or launch the desktop container application.
+2. Follow on-screen configuration prompts and UI buttons.
 
 ---
 ### EliteSoftwareTech Co. - GUI Guidelines
