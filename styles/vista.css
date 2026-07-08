@@ -1,0 +1,420 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+    /* These act as placeholders until the JS randomizes them a millisecond later */
+    --font-headings: 'Futura', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-ui: 'Helvetica Neue', sans-serif;
+}
+
+/* 1. Headings */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-headings) !important;
+}
+
+/* 2. Standard Body & Table Data */
+body, p, table, th, td, span, div {
+    font-family: var(--font-body) !important;
+}
+
+/* 3. Interactive UI Elements */
+button, input, select, textarea {
+    font-family: var(--font-ui) !important;
+}
+
+:root {
+    /* Classic Windows Aero / WinForms Style Variables + Brand Colors */
+    --brand-coral: #F16954;
+    --brand-teal: #52BFC1;
+    --brand-yellow: #F3C332;
+    
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.9);
+    --desktop-bg: #4a759c;
+    
+    --win-border: #7a9ea5;
+    --text-dark: #1e1e1e;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: linear-gradient(135deg, #2b5a84, #5086b5);
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0; /* Zero padding to eliminate whitespace */
+    color: var(--text-dark);
+    min-height: 100vh;
+}
+
+/* Glass Container - Maximized Edge-to-Edge */
+.app-container {
+    max-width: 100%;
+    margin: 0 auto;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: none; /* Removed border for maximized look */
+    border-radius: 0; /* Flush to screen edges */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-height: 100vh;
+}
+
+/* Dynamic Flexbox Logo Header */
+.brand-logo-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    padding: 15px 10px 20px 10px;
+    border: 1px solid var(--win-border);
+    border-radius: 4px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    user-select: none;
+}
+
+.brand-text-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.brand-text-coral, .brand-text-teal {
+    font-family: 'Arial Black', Impact, sans-serif;
+    font-size: clamp(28px, 8vw, 56px);
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+.brand-text-coral { color: var(--brand-coral); }
+.brand-text-teal { color: var(--brand-teal); }
+
+.brand-bolt {
+    height: clamp(28px, 8vw, 56px);
+    width: auto;
+    display: block;
+}
+
+.brand-pearls-row {
+    display: flex;
+    gap: clamp(10px, 3vw, 20px);
+    margin-top: -5px;
+}
+
+.brand-pearl {
+    width: clamp(20px, 5vw, 32px);
+    height: clamp(20px, 5vw, 32px);
+}
+
+/* 3D Button Styles */
+.btn-3d {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.1s;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #707070;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 4px rgba(0,0,0,0.2);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.btn-3d:active {
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
+    transform: translateY(1px);
+}
+
+.btn-teal {
+    background: linear-gradient(to bottom, #8ee1e3 0%, #68ced0 49%, var(--brand-teal) 50%, #3eacad 100%);
+    border-color: #2b7d7e;
+    color: white;
+}
+
+.btn-coral {
+    background: linear-gradient(to bottom, #fcae9f 0%, #f68471 49%, var(--brand-coral) 50%, #db503a 100%);
+    border-color: #a4301f;
+    color: white;
+}
+
+.btn-yellow {
+    background: linear-gradient(to bottom, #fceca1 0%, #f8d764 49%, var(--brand-yellow) 50%, #e1ad10 100%);
+    border-color: #9e7807;
+    color: #333;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.6);
+}
+
+.btn-gray {
+    background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 49%, #d0d0d0 50%, #c0c0c0 100%);
+    border-color: #888;
+    color: #333;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* Controls / Search Bar */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(255,255,255,0.5);
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.8);
+}
+
+.search-box {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid var(--win-border);
+    border-radius: 3px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    min-width: 200px;
+}
+
+.action-group {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+.action-group .btn-3d {
+    flex: 1;
+}
+
+/* Inventory List */
+.inventory-wrapper {
+    background: white;
+    border: 1px solid var(--win-border);
+    border-radius: 3px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.category {
+    border-bottom: 1px solid #ddd;
+}
+
+.category-header {
+    background: linear-gradient(to bottom, #ffffff 0%, #e2e8f1 100%);
+    color: #0c327d;
+    padding: 12px 15px;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    border-top: 1px solid white;
+    border-bottom: 1px solid var(--win-border);
+}
+
+.category-header:active {
+    background: #d4deec;
+}
+
+.category-content {
+    display: block;
+}
+.category-content.collapsed {
+    display: none;
+}
+
+/* Item Row & Par Level Indicators */
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    background: #fafafa;
+}
+.item-row:nth-child(even) {
+    background: #ffffff;
+}
+.item-row:last-child {
+    border-bottom: none;
+}
+.item-name {
+    flex-grow: 1;
+    font-size: 15px;
+    padding-right: 10px;
+}
+
+.par-warning {
+    display: none;
+    font-size: 13px;
+    color: var(--brand-coral);
+    margin-left: 6px;
+    font-weight: bold;
+    font-style: italic;
+}
+
+/* Visually flag the row as low stock on screen */
+.below-par .item-name .name-text {
+    color: var(--brand-coral);
+    font-weight: bold;
+}
+
+/* Controls */
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.qty-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+
+.qty-input {
+    width: 60px;
+    height: 44px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    border: 1px solid var(--win-border);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 3px;
+}
+
+/* Custom Items Section */
+.custom-item-adder {
+    padding: 15px;
+    background: #fdfae5;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.custom-item-adder input {
+    flex-grow: 1;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid var(--win-border);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 3px;
+}
+.delete-custom-btn {
+    background: transparent;
+    border: none;
+    color: var(--brand-coral);
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+/* Error Log */
+.error-log {
+    background: #222;
+    color: #0f0;
+    font-family: monospace;
+    padding: 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: 2px inset #555;
+    max-height: 100px;
+    overflow-y: auto;
+}
+.error-log:empty {
+    display: none;
+}
+
+/* Print Styles - Overhauled for Native Page Breaks & Red Warnings */
+@media print {
+    body { 
+        background: white; 
+        padding: 0; 
+        zoom: 1; 
+        min-height: auto; 
+        display: block; 
+    }
+    .app-container { 
+        box-shadow: none; 
+        border: none; 
+        max-width: 100%; 
+        display: block; 
+        min-height: auto; 
+    }
+    .inventory-wrapper { 
+        border: none; 
+        box-shadow: none; 
+        overflow: visible !important; 
+        display: block; 
+    }
+    .category { 
+        display: block; 
+    }
+    .toolbar, .category-header span, .qty-btn, .custom-item-adder, .error-log, .delete-custom-btn { 
+        display: none !important; 
+    }
+    .category-content { 
+        display: block !important; 
+    }
+    .qty-input { 
+        border: none; 
+        box-shadow: none; 
+        background: transparent; 
+        font-size: 16px; 
+        text-align: right; 
+        width: auto; 
+        padding: 0; 
+        height: auto; 
+    }
+    .category-header { 
+        background: #eee !important; 
+        border: 1px solid #000; 
+        color: #000; 
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact;
+        page-break-after: avoid; 
+        break-after: avoid;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    .item-row { 
+        border-bottom: 1px solid #ccc; 
+        page-break-inside: avoid; 
+        break-inside: avoid;
+    }
+
+    /* Unhide and force red ink for items at/below par during print */
+    .below-par .item-name .name-text {
+        color: #d32f2f !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .below-par .par-warning {
+        display: inline-block !important;
+        color: #d32f2f !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

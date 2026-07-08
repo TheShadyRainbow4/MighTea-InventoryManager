@@ -1,0 +1,6 @@
+gemini.md
+user.md
+.agents/
+__pycache__/
+*.pyc
+.venv/
