@@ -1,27 +1,5 @@
 
-// --- FONT ROULETTE RANDOMIZER ---
-(function randomizeFonts() {
-    // Our three required fonts
-    const fonts = [
-        '"Futura", sans-serif', 
-        '"Inter", sans-serif', 
-        '"Helvetica Neue", sans-serif'
-    ];
 
-    // Fisher-Yates Shuffle to ensure true randomness and absolutely zero repeats
-    for (let i = fonts.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [fonts[i], fonts[j]] = [fonts[j], fonts[i]];
-    }
-
-    // Assign the shuffled fonts to the CSS variables
-    document.documentElement.style.setProperty('--font-headings', fonts[0]);
-    document.documentElement.style.setProperty('--font-body', fonts[1]);
-    document.documentElement.style.setProperty('--font-ui', fonts[2]);
-    
-    console.log("🎲 Font Roulette Spun! Headings:", fonts[0], "| Body:", fonts[1], "| UI:", fonts[2]);
-})();
-// --------------------------------
 
 // --- Global State Management ---
 window.appState = {

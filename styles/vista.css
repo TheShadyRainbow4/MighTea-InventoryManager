@@ -1,10 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 :root {
-    /* These act as placeholders until the JS randomizes them a millisecond later */
-    --font-headings: 'Futura', sans-serif;
-    --font-body: 'Inter', sans-serif;
-    --font-ui: 'Helvetica Neue', sans-serif;
+    --font-headings: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-ui: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* 1. Headings */
